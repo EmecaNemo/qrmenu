@@ -25,7 +25,7 @@
    ========================================================================== */
 
 window.SiparisAyar = {
-  mod: "yerel",                     // "yerel" veya "supabase"
+  mod: "supabase",                  // "yerel" veya "supabase"
   supabase: {
     // Supabase panelinde: adres çubuğundaki proje kodu → https://<kod>.supabase.co
     // ya da Settings → Data API → Project URL
@@ -227,14 +227,29 @@ window.SiparisServisi = (function () {
     });
   }
 
-  /** Demo sıfırlama — yalnızca yerel modda çalışır. */
+  /** Demo sıfırlama. */
   async function hepsiniSil() {
-    if (AYAR().mod === "supabase") {
-      await baslat();
-      const { error } = await sb.from("siparisler").delete().neq("id", "");
-      if (error) throw error;
-    } else {
+    if (AYAR().mod !== "supabase") {
       yerelYaz([]);
+      return;
+    }
+
+    await baslat();
+
+    // Kaç kayıt olduğunu önce sayıyoruz: RLS silmeyi engellerse PostgREST
+    // hata döndürmez, sessizce 0 satır siler. .select() ile gerçekten
+    // silinenleri geri isteyip karşılaştırmazsak sorunu fark edemeyiz.
+    const { count } = await sb.from("siparisler").select("id", { count: "exact", head: true });
+    if (!count) return;
+
+    const { data, error } = await sb.from("siparisler").delete().neq("id", "").select("id");
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error(
+        "Silme izni yok. Veritabanında silme (delete) kuralı tanımlı değil — " +
+        "supabase-kurulum.sql içindeki \"herkes silebilir\" bölümünü çalıştır."
+      );
     }
   }
 

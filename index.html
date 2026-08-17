@@ -1061,9 +1061,12 @@
   const MASA = (adresAyar.get("masa") || "").trim();
   const siparisAcik = MASA !== "";
 
-  // ?supabase=1 → gerçek sunucu modunu dosyayı değiştirmeden dene.
-  // Kalıcı açmak için siparis-servisi.js içindeki SiparisAyar.mod değerini değiştir.
-  if (adresAyar.get("supabase") === "1") window.SiparisAyar.mod = "supabase";
+  // Arka ucu adresten geçici olarak değiştir:
+  //   ?supabase=1 → gerçek sunucu   ·   ?supabase=0 → yerel demo
+  // Kalıcı ayar siparis-servisi.js içindeki SiparisAyar.mod değeridir.
+  const modSecim = adresAyar.get("supabase");
+  if (modSecim === "1") window.SiparisAyar.mod = "supabase";
+  if (modSecim === "0") window.SiparisAyar.mod = "yerel";
 
   const ekleDugmeleri = new Map();   // ürün adı → "+" düğmesi
   const sepet = new Map();           // ürün adı → { ad, fiyat, fiyatMetin, adet }

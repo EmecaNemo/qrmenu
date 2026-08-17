@@ -68,6 +68,23 @@ create policy "herkes durum guncelleyebilir"
   with check (true);
 
 -- ---------------------------------------------------------------------------
+-- SİLME İZNİ — bilerek KAPALI bırakıldı
+-- ---------------------------------------------------------------------------
+-- Silme kuralı olmadığı için paneldeki "Demo siparişlerini sil" düğmesi
+-- supabase modunda "silme izni yok" uyarısı verir. Doğru davranış budur:
+-- siparişleri internetten herkesin silebilmesi istenmez.
+--
+-- Test kayıtlarını temizlemek için Supabase panelini kullan:
+--   Table Editor → siparisler → satırları seç → Delete
+--
+-- Düğmenin demo sırasında çalışmasını istiyorsan aşağıdaki üç satırı aç.
+-- Gerçek servise geçmeden önce mutlaka geri kapat.
+--
+-- create policy "herkes silebilir"
+--   on siparisler for delete
+--   to anon using (true);
+
+-- ---------------------------------------------------------------------------
 -- Eski siparişleri temizleme (isteğe bağlı)
 -- Supabase → Database → Cron ile günlük çalıştırabilirsin.
 -- ---------------------------------------------------------------------------

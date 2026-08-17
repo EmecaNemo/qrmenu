@@ -302,10 +302,13 @@
 <script>
   "use strict";
 
-  /* Panel adresine ?supabase=1 eklenirse gerçek sunucu modu denenir.
-     Kalıcı olarak açmak için siparis-servisi.js içindeki AYAR bloğunu düzenle. */
+  /* Arka ucu adresten geçici olarak değiştir:
+       ?supabase=1 → gerçek sunucu   ·   ?supabase=0 → yerel demo
+     Kalıcı ayar siparis-servisi.js içindeki SiparisAyar.mod değeridir. */
   const urlAyar = new URLSearchParams(location.search);
-  if (urlAyar.get("supabase") === "1") window.SiparisAyar.mod = "supabase";
+  const modSecim = urlAyar.get("supabase");
+  if (modSecim === "1") window.SiparisAyar.mod = "supabase";
+  if (modSecim === "0") window.SiparisAyar.mod = "yerel";
 
   const DURUM_ADI = {
     yeni: "Yeni",
