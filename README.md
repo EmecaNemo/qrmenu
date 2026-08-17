@@ -4,11 +4,13 @@ Telefon için tek dosyalık dijital menü + baskıya hazır QR kod ve masa kartl
 Müşteri adaylarına gösterilmek üzere hazırlanmış demo; her işletme için içerik ve
 renk şeması değiştirilerek yeniden kullanılır.
 
+**Canlı adres:** <https://emecanemo.github.io/qrmenu/> — QR kodları bu adresi gösterir.
+
 ## Dosyalar
 
 | Dosya | Ne işe yarar |
 |---|---|
-| `menu.html` | Menünün tamamı — veri, tasarım ve kod tek dosyada. |
+| `index.html` | Menünün tamamı — veri, tasarım ve kod tek dosyada. Düzenlenecek tek dosya budur. |
 | `qr-uret.js` | Menü linkinden QR kodu ve masa kartı üretir. |
 | `cikti/qr.png` | 2000px QR — sticker, etiket, tabela baskısı için. |
 | `cikti/qr.svg` | Vektör QR — her boyuta bozulmadan büyür. |
@@ -31,7 +33,7 @@ Seçilen tema tarayıcıda hatırlanır; gösterimden sonra **Kömür**'e geri a
 
 ## Yeni müşteri için menü hazırlamak
 
-`menu.html` dosyasını kopyala ve içindeki üç bölümü düzenle.
+`index.html` dosyasını kopyala ve içindeki üç bölümü düzenle.
 
 ### 1 · Ürünler ve fiyatlar — `MENU` dizisi
 
@@ -69,7 +71,7 @@ Karışık kullanım serbest: fotoğrafı olan ürün fotoğrafı, olmayan çizi
 Dört tema hazır. Müşterinin kendi renkleri gerekiyorsa `:root[data-palette="..."]`
 bloklarından birini kopyala, hex değerleri değiştir ve `PALETLER` dizisine bir satır ekle.
 
-Teslim edilen menüde tema barını kaldırmak için `menu.html` içindeki
+Teslim edilen menüde tema barını kaldırmak için `index.html` içindeki
 `<div class="palette-bar">` ve `<button class="pb-reopen">` satırlarını sil,
 `VARSAYILAN_PALET` değerini müşterinin temasına ayarla.
 
@@ -97,8 +99,22 @@ aynı kart her zaman güncel menüyü gösterir, kartları tekrar bastırmaya ge
 
 ---
 
+## Değişikliği yayına almak
+
+`index.html` düzenlendikten sonra:
+
+```sh
+git add -A && git commit -m "fiyat güncellemesi" && git push
+```
+
+Bir dakika içinde <https://emecanemo.github.io/qrmenu/> güncellenir. **QR değişmez** —
+basılı kartlar aynen çalışmaya devam eder.
+
 ## Notlar
 
 - Menü fotoğrafı kısmiydi: **içecekler ve tatlılar** bu listede yok.
 - QR'ı bastırmadan önce mutlaka kendi telefonunla okut ve menünün açıldığını doğrula.
-- Menü linki herkese açık olmalı; aksi halde müşteri QR'ı okuttuğunda sayfayı göremez.
+- **QR'da claude.ai adresi kullanma:** telefondaki Claude uygulaması o adresi kendine
+  ait sayıp araya giriyor, menü yerine uygulama açılıyor. Menü kendi alan adında durmalı.
+- Gerçek müşteriye kart bastırırken `github.io` yerine kendi alan adını kullan
+  (örn. `qrmenum.com/ardabufe`). Adres yıllarca masada duracak, senin kontrolünde olsun.
