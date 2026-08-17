@@ -152,6 +152,10 @@
     background: var(--durum-renk);
   }
 
+  /* Satış demosundan gelen sipariş: mutfak yanlışlıkla hazırlamasın */
+  .rozet.demo { background: var(--text); color: var(--ink); }
+  .siparis.demo-kayit { border-left-style: dashed; }
+
   .saat {
     margin-left: auto;
     font-family: var(--num);
@@ -394,11 +398,15 @@
     const kart = document.createElement("article");
     kart.className = "siparis " + s.durum;
 
+    const demoMu = s.masa === "DEMO";
+    if (demoMu) kart.classList.add("demo-kayit");
+
     const ust = document.createElement("div");
     ust.className = "s-ust";
     ust.innerHTML =
-      '<span class="masa">Masa ' + s.masa + '</span>' +
+      '<span class="masa">' + (demoMu ? "Demo masası" : "Masa " + s.masa) + '</span>' +
       '<span class="rozet">' + DURUM_ADI[s.durum] + '</span>' +
+      (demoMu ? '<span class="rozet demo">Pişirmeyin</span>' : '') +
       '<span class="saat">' + saatYaz(s.olusturma) + '</span>';
     kart.appendChild(ust);
 

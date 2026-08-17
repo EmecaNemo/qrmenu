@@ -77,12 +77,25 @@ create policy "herkes durum guncelleyebilir"
 -- Test kayıtlarını temizlemek için Supabase panelini kullan:
 --   Table Editor → siparisler → satırları seç → Delete
 --
--- Düğmenin demo sırasında çalışmasını istiyorsan aşağıdaki üç satırı aç.
+-- Düğmenin TÜM siparişler için çalışmasını istiyorsan aşağıdaki üç satırı aç.
 -- Gerçek servise geçmeden önce mutlaka geri kapat.
 --
 -- create policy "herkes silebilir"
 --   on siparisler for delete
 --   to anon using (true);
+
+
+-- ---------------------------------------------------------------------------
+-- DEMO MASASI — satış görüşmesi için
+-- ---------------------------------------------------------------------------
+-- demo.html sayfası masa numarası olarak 'DEMO' kullanır. Aşağıdaki kural
+-- yalnızca o masanın siparişlerinin silinmesine izin verir; gerçek masaların
+-- siparişlerine dokunulamaz. Güvenli, açık bırakılabilir.
+drop policy if exists "demo siparisleri silinebilir" on siparisler;
+create policy "demo siparisleri silinebilir"
+  on siparisler for delete
+  to anon
+  using (masa = 'DEMO');
 
 -- ---------------------------------------------------------------------------
 -- Eski siparişleri temizleme (isteğe bağlı)

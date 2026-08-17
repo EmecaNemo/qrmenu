@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>QR Menü — Canlı Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0C0A09" />
+<style>
+  /* Satış görüşmesi ekranı: solda okutulacak QR, sağda gelen sipariş.
+     Müşteri kendi telefonundan sipariş verir, siparişi bu ekranda görür. */
+  :root {
+    --ink: #0C0A09;  --ink-2: #14100E;  --surface: #1A1512;  --rule: #2E2521;
+    --accent: #E23A21;  --text: #F6F0EA;  --muted: #A2938A;
+    --yeni: #E23A21;  --hazirlaniyor: #D89B2A;  --hazir: #3FA96A;  --teslim: #5C6B72;
+
+    --display: "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow",
+               "Helvetica Neue", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --num: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--body);
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(120% 60% at 50% 0%, rgba(226,58,33,.10), transparent 60%);
+  }
+
+  /* ------------------------------------------------------------- üst bar */
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px 20px;
+    flex-wrap: wrap;
+    padding: 14px clamp(16px, 3vw, 30px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .baslik {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 17px;
+  }
+  .baslik em { font-style: normal; color: var(--accent); }
+
+  .rozet-canli {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--hazir); }
+  .nokta.uyari { background: var(--hazirlaniyor); }
+  .nokta.hata { background: var(--yeni); }
+
+  .sifirla {
+    margin-left: auto;
+    padding: 8px 15px;
+    border: 1px solid var(--rule);
+    background: var(--ink-2);
+    color: var(--muted);
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  .sifirla:hover { color: var(--text); border-color: var(--accent); }
+  .sifirla:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* --------------------------------------------------------------- düzen */
+
+  main {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: clamp(16px, 3vw, 34px);
+    padding: clamp(18px, 3vw, 34px);
+    align-items: start;
+  }
+  @media (max-width: 780px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* ------------------------------------------------------------------ QR */
+
+  .qr-sutun {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: clamp(18px, 3vw, 28px);
+  }
+
+  .qr-cerceve {
+    width: 100%;
+    max-width: 290px;
+    aspect-ratio: 1;
+    background: #fff;
+    padding: 14px;
+  }
+  .qr-cerceve img { width: 100%; height: 100%; display: block; }
+
+  .qr-cagri {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 17px;
+  }
+  .qr-alt { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+  .adimlar {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+    text-align: left;
+  }
+  .adimlar li {
+    display: flex;
+    gap: 11px;
+    align-items: baseline;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .adimlar b {
+    flex: 0 0 auto;
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--num);
+    font-size: 12px;
+    border-radius: 50%;
+  }
+
+  .baglanti-yok {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--ink-2);
+    border-left: 3px solid var(--yeni);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: left;
+  }
+  .baglanti-yok[hidden] { display: none; }
+
+  /* -------------------------------------------------------- sipariş alanı */
+
+  .siparis-sutun { display: flex; flex-direction: column; gap: 14px; }
+
+  .sutun-baslik {
+    margin: 0;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .bekleme {
+    border: 1px dashed var(--rule);
+    padding: clamp(34px, 7vw, 64px) 22px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .bekleme .puls {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent);
+    animation: puls 1.8s ease-in-out infinite;
+  }
+  @keyframes puls {
+    0%, 100% { transform: scale(1); opacity: .45; }
+    50%      { transform: scale(1.45); opacity: 1; }
+  }
+  .bekleme strong {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-size: 14px;
+  }
+  .bekleme span { color: var(--muted); font-size: 13.5px; max-width: 34ch; }
+
+  .kartlar { display: flex; flex-direction: column; gap: 12px; }
+
+  .siparis {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 5px solid var(--durum-renk, var(--rule));
+  }
+  .siparis.yeni { --durum-renk: var(--yeni); animation: dikkat 1.4s ease-out 3; }
+  .siparis.hazirlaniyor { --durum-renk: var(--hazirlaniyor); }
+  .siparis.hazir { --durum-renk: var(--hazir); }
+  .siparis.teslim { --durum-renk: var(--teslim); opacity: .6; }
+  .siparis.iptal { --durum-renk: var(--teslim); opacity: .45; }
+
+  @keyframes dikkat {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(226,58,33,0); }
+    50%      { box-shadow: 0 0 0 5px rgba(226,58,33,.3); }
+  }
+
+  .s-ust {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 15px 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .masa {
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 19px;
+  }
+  .rozet {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    color: #0C0A09;
+    background: var(--durum-renk);
+  }
+  .saat { margin-left: auto; font-family: var(--num); font-size: 12px; color: var(--muted); }
+
+  .urunler { list-style: none; margin: 0; padding: 11px 15px; display: flex; flex-direction: column; gap: 7px; }
+  .urun { display: flex; gap: 11px; align-items: baseline; }
+  .adet { font-family: var(--num); font-weight: 700; color: var(--accent); min-width: 2.2em; }
+  .urun-ad { flex: 1; }
+  .urun-fiyat { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+
+  .not {
+    margin: 0 15px 11px;
+    padding: 9px 11px;
+    background: var(--ink-2);
+    border-left: 3px solid var(--hazirlaniyor);
+    font-size: 13.5px;
+  }
+  .not b {
+    display: block;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 10px;
+    color: var(--hazirlaniyor);
+    margin-bottom: 3px;
+  }
+
+  .toplam {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--num);
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+  .toplam span:first-child {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .eylemler { display: flex; gap: 1px; background: var(--rule); border-top: 1px solid var(--rule); }
+  .eylem {
+    flex: 1;
+    padding: 13px 8px;
+    border: 0;
+    background: var(--ink-2);
+    color: var(--text);
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .eylem:hover { background: #221B17; }
+  .eylem:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .eylem.birincil { background: var(--accent); color: #fff; }
+  .eylem.olumlu { background: var(--hazir); color: #06210F; }
+  .eylem.birincil:hover, .eylem.olumlu:hover { filter: brightness(1.1); }
+
+  .ipucu {
+    padding: 11px 14px;
+    background: var(--ink-2);
+    border-left: 3px solid var(--hazir);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .ipucu b { color: var(--text); }
+  .ipucu[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .siparis.yeni, .bekleme .puls { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="baslik">Arda <em>Büfe</em> · Canlı Demo</h1>
+  <span class="rozet-canli"><span class="nokta" id="durumNokta"></span><span id="durumYazi">Bağlanıyor</span></span>
+  <button class="sifirla" id="sifirla" type="button">Demoyu sıfırla</button>
+</header>
+
+<main>
+  <section class="qr-sutun">
+    <div class="qr-cerceve">
+      <img src="qr-demo.png" alt="Demo menüsünün QR kodu" />
+    </div>
+    <p class="qr-cagri">Telefonunuzla okutun</p>
+    <p class="qr-alt">Kamerayı QR'a tutmanız yeterli — uygulama indirmeye gerek yok.</p>
+
+    <ol class="adimlar">
+      <li><b>1</b><span>QR'ı okutun, menü telefonunuzda açılsın</span></li>
+      <li><b>2</b><span>Beğendiğiniz ürünlerin yanındaki <strong>+</strong> düğmesine basın</span></li>
+      <li><b>3</b><span>Siparişi gönderin — bu ekranda anında belirecek</span></li>
+    </ol>
+
+    <p class="baglanti-yok" id="baglantiYok" hidden></p>
+  </section>
+
+  <section class="siparis-sutun">
+    <h2 class="sutun-baslik">Mutfağa düşen siparişler</h2>
+    <div id="alan"></div>
+    <p class="ipucu" id="ipucu" hidden>
+      <b>Şimdi «Sipariş hazır»a basın.</b> Müşterinin telefonundaki ekran
+      hiçbir şey yapmadan anında güncellenir — asıl gösterilecek şey budur.
+    </p>
+  </section>
+</main>
+
+<!-- ?v=N tarayıcı önbelleğini kırar. siparis-servisi.js'i değiştirdiğinde
+     bu numarayı index.html ve panel.html ile birlikte artır. -->
+<script src="siparis-servisi.js?v=2"></script>
+<script>
+  "use strict";
+
+  const DEMO_MASA = "DEMO";
+
+  const DURUM_ADI = {
+    yeni: "Yeni", hazirlaniyor: "Hazırlanıyor", hazir: "Hazır",
+    teslim: "Teslim edildi", iptal: "İptal"
+  };
+
+  const alanEl   = document.getElementById("alan");
+  const ipucuEl  = document.getElementById("ipucu");
+  const noktaEl  = document.getElementById("durumNokta");
+  const yaziEl   = document.getElementById("durumYazi");
+  const uyariEl  = document.getElementById("baglantiYok");
+
+  /* Görüşme sırasında tarayıcı uyarısı (alert) açılmasın — sayfa içinde göster. */
+  let hataZaman = null;
+  function hataGoster(mesaj) {
+    uyariEl.hidden = false;
+    uyariEl.textContent = mesaj;
+    clearTimeout(hataZaman);
+    hataZaman = setTimeout(() => { uyariEl.hidden = true; }, 9000);
+    console.error(mesaj);
+  }
+
+  function saatYaz(zaman) {
+    const d = new Date(zaman);
+    const fark = Math.floor((Date.now() - zaman) / 60000);
+    const saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+    return fark < 1 ? saat + " · şimdi" : saat + " · " + fark + " dk";
+  }
+
+  function kartYap(s) {
+    const kart = document.createElement("article");
+    kart.className = "siparis " + s.durum;
+
+    const ust = document.createElement("div");
+    ust.className = "s-ust";
+    ust.innerHTML =
+      '<span class="masa">Demo masası</span>' +
+      '<span class="rozet">' + DURUM_ADI[s.durum] + '</span>' +
+      '<span class="saat">' + saatYaz(s.olusturma) + '</span>';
+    kart.appendChild(ust);
+
+    const ul = document.createElement("ul");
+    ul.className = "urunler";
+    for (const u of s.urunler) {
+      const li = document.createElement("li");
+      li.className = "urun";
+      const adet = document.createElement("span");
+      adet.className = "adet";
+      adet.textContent = u.adet + "×";
+      const ad = document.createElement("span");
+      ad.className = "urun-ad";
+      ad.textContent = u.ad;
+      const fiyat = document.createElement("span");
+      fiyat.className = "urun-fiyat";
+      fiyat.textContent = SiparisServisi.paraYaz(u.fiyat * u.adet);
+      li.append(adet, ad, fiyat);
+      ul.appendChild(li);
+    }
+    kart.appendChild(ul);
+
+    if (s.siparisNotu) {
+      const not = document.createElement("div");
+      not.className = "not";
+      const b = document.createElement("b");
+      b.textContent = "Müşteri notu";
+      not.appendChild(b);
+      not.appendChild(document.createTextNode(s.siparisNotu));
+      kart.appendChild(not);
+    }
+
+    const toplam = document.createElement("div");
+    toplam.className = "toplam";
+    toplam.innerHTML = "<span>Toplam</span><span>" + SiparisServisi.paraYaz(s.toplam) + " TL</span>";
+    kart.appendChild(toplam);
+
+    const eylemler = document.createElement("div");
+    eylemler.className = "eylemler";
+
+    function dugme(yazi, durum, sinif) {
+      const b = document.createElement("button");
+      b.className = "eylem " + (sinif || "");
+      b.type = "button";
+      b.textContent = yazi;
+      b.addEventListener("click", () => {
+        b.disabled = true;
+        SiparisServisi.durumGuncelle(s.id, durum).catch(e => {
+          b.disabled = false;
+          hataGoster("Güncellenemedi: " + e.message);
+        });
+      });
+      return b;
+    }
+
+    if (s.durum === "yeni") {
+      eylemler.append(dugme("Hazırlanıyor", "hazirlaniyor", "birincil"));
+    } else if (s.durum === "hazirlaniyor") {
+      eylemler.append(dugme("Sipariş hazır", "hazir", "olumlu"), dugme("Geri al", "yeni"));
+    } else if (s.durum === "hazir") {
+      eylemler.append(dugme("Teslim edildi", "teslim", "birincil"), dugme("Geri al", "hazirlaniyor"));
+    } else {
+      eylemler.append(dugme("Baştan al", "yeni"));
+    }
+
+    kart.appendChild(eylemler);
+    return kart;
+  }
+
+  let sonListe = [];
+
+  function ciz(liste) {
+    sonListe = liste;
+    const demolar = liste.filter(s => s.masa === DEMO_MASA);
+
+    alanEl.textContent = "";
+
+    if (!demolar.length) {
+      const bekle = document.createElement("div");
+      bekle.className = "bekleme";
+      bekle.innerHTML =
+        '<span class="puls"></span>' +
+        "<strong>Sipariş bekleniyor</strong>" +
+        "<span>Soldaki QR'ı telefonunuzla okutup sipariş verin, buraya anında düşsün.</span>";
+      alanEl.appendChild(bekle);
+      ipucuEl.hidden = true;
+      return;
+    }
+
+    const kartlar = document.createElement("div");
+    kartlar.className = "kartlar";
+    for (const s of demolar) kartlar.appendChild(kartYap(s));
+    alanEl.appendChild(kartlar);
+
+    ipucuEl.hidden = !demolar.some(s => s.durum === "hazirlaniyor");
+  }
+
+  function durumGoster(sinif, yazi) {
+    noktaEl.className = "nokta " + sinif;
+    yaziEl.textContent = yazi;
+  }
+
+  SiparisServisi.abone(liste => {
+    durumGoster(
+      window.SiparisAyar.mod === "supabase" ? "" : "uyari",
+      window.SiparisAyar.mod === "supabase" ? "Canlı" : "Demo modu"
+    );
+    ciz(liste);
+  });
+
+  SiparisServisi.baslat().catch(e => {
+    durumGoster("hata", "Bağlanamadı");
+    hataGoster("Sunucuya bağlanılamadı: " + e.message + " — İnternet bağlantınızı kontrol edin.");
+  });
+
+  document.getElementById("sifirla").addEventListener("click", function () {
+    this.disabled = true;
+    SiparisServisi.sil(DEMO_MASA)
+      .catch(e => hataGoster("Sıfırlanamadı: " + e.message))
+      .finally(() => { this.disabled = false; });
+  });
+
+  setInterval(() => ciz(sonListe), 60000);
+</script>
+</body>
+</html>

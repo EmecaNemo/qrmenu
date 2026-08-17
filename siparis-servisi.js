@@ -227,10 +227,15 @@ window.SiparisServisi = (function () {
     });
   }
 
-  /** Demo sıfırlama. */
-  async function hepsiniSil() {
+  /**
+   * Sipariş siler.
+   * @param {string} [masa] Verilirse yalnızca o masanın siparişleri silinir.
+   *                        Demo sayfası "DEMO" gönderir — gerçek masalara dokunmaz.
+   */
+  async function sil(masa) {
     if (AYAR().mod !== "supabase") {
-      yerelYaz([]);
+      if (!masa) { yerelYaz([]); return; }
+      yerelYaz(yerelOku().filter(s => s.masa !== masa));
       return;
     }
 
@@ -239,19 +244,26 @@ window.SiparisServisi = (function () {
     // Kaç kayıt olduğunu önce sayıyoruz: RLS silmeyi engellerse PostgREST
     // hata döndürmez, sessizce 0 satır siler. .select() ile gerçekten
     // silinenleri geri isteyip karşılaştırmazsak sorunu fark edemeyiz.
-    const { count } = await sb.from("siparisler").select("id", { count: "exact", head: true });
+    let sayim = sb.from("siparisler").select("id", { count: "exact", head: true });
+    if (masa) sayim = sayim.eq("masa", masa);
+    const { count } = await sayim;
     if (!count) return;
 
-    const { data, error } = await sb.from("siparisler").delete().neq("id", "").select("id");
+    let silme = sb.from("siparisler").delete();
+    silme = masa ? silme.eq("masa", masa) : silme.neq("id", "");
+    const { data, error } = await silme.select("id");
     if (error) throw error;
 
     if (!data || data.length === 0) {
       throw new Error(
-        "Silme izni yok. Veritabanında silme (delete) kuralı tanımlı değil — " +
-        "supabase-kurulum.sql içindeki \"herkes silebilir\" bölümünü çalıştır."
+        "Silme izni yok. Veritabanında bu kayıtlar için silme (delete) kuralı tanımlı değil — " +
+        "supabase-kurulum.sql dosyasındaki silme bölümünü çalıştır."
       );
     }
   }
 
-  return { baslat, abone, gonder, durumGuncelle, takip, hepsiniSil, fiyatSayi, paraYaz, DURUMLAR };
+  /** Geriye dönük uyumluluk: eski çağrı adı. */
+  function hepsiniSil() { return sil(); }
+
+  return { baslat, abone, gonder, durumGuncelle, takip, sil, hepsiniSil, fiyatSayi, paraYaz, DURUMLAR };
 })();

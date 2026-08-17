@@ -1292,7 +1292,10 @@
 
   if (siparisAcik) {
     document.body.classList.add("siparis-acik");
-    document.getElementById("masaSerit").textContent = "Masa " + MASA + " · Sipariş verebilirsiniz";
+    // Satış demosunda "Masa DEMO" yazısı teknik duruyor; müşteriye sade göster
+    document.getElementById("masaSerit").textContent = (MASA === "DEMO")
+      ? "Sipariş verebilirsiniz"
+      : "Masa " + MASA + " · Sipariş verebilirsiniz";
   }
 
   /* ------------------------------------------------------------ sepet ---- */
