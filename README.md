@@ -112,11 +112,16 @@ Her kartın üstünde masa numarası yazar.
 
 | Mod | Ne yapar | Nerede kullanılır |
 |---|---|---|
-| `"yerel"` | Siparişler tarayıcının hafızasında. Aynı tarayıcının sekmeleri birbirini görür. | **Demo.** Farklı cihazlar birbirini görmez. |
-| `"supabase"` | Siparişler gerçek sunucuda. Telefon ve mutfak tableti canlı bağlı. | **Gerçek servis.** |
+| `"supabase"` | Siparişler gerçek sunucuda. Telefon ve mutfak tableti canlı bağlı. | **Şu an aktif olan mod.** |
+| `"yerel"` | Siparişler tarayıcının hafızasında. Aynı tarayıcının sekmeleri birbirini görür. | İnternetsiz demo, geliştirme. |
 
-**Demoyu göstermek için** (kurulum gerekmez): bilgisayarda iki sekme aç —
-biri `index.html?masa=5`, diğeri `panel.html`. Sipariş ver, panele anında düşsün.
+**Durum:** sunucu bağlantısı kurulu ve test edildi. Telefondan sipariş ver,
+mutfak panelinde anında görünür.
+
+- Müşteri: `https://emecanemo.github.io/qrmenu/?masa=5`
+- Mutfak: `https://emecanemo.github.io/qrmenu/panel.html`
+
+İnternetsiz/sunucusuz demo için adrese `?supabase=0` ekle.
 
 ### Gerçek sunucuya geçiş
 
