@@ -1,0 +1,896 @@
+<meta charset="utf-8" />
+<title>Arda Büfe Menü</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Arda Büfe QR menü — kahvaltılar, tostlar, ana yemekler ve patso." />
+<meta name="theme-color" content="#0C0A09" />
+
+<style>
+  /* ==========================================================================
+     QR MENÜ — örnek şablon
+     · Ürün ve fiyatlar: aşağıdaki MENU dizisi
+     · Renk şemaları: PALETLER bölümü (4 hazır tema, alt bardan canlı değişir)
+     · Fotoğraf: ürüne photo:"foto/tost.jpg" ekle, çizim yerine fotoğraf gelir
+     ========================================================================== */
+
+  /* ---------------------------------------------------------------- PALETLER */
+
+  /* 1 · KÖMÜR — büfe, tost salonu, ocakbaşı (varsayılan) */
+  :root,
+  :root[data-palette="komur"] {
+    --ink: #0C0A09;  --ink-2: #14100E;  --surface: #1A1512;  --rule: #2E2521;
+    --accent: #E23A21;  --accent-ink: #FFFFFF;
+    --text: #F6F0EA;  --muted: #A2938A;
+    --scrim: rgba(12,10,9,.94);
+    --glow-1: rgba(226,58,33,.10);  --glow-2: rgba(226,58,33,.05);
+    --art-bg: linear-gradient(155deg, #2A211C, #16110E);
+    --art-bg-2: linear-gradient(25deg, #241C18, #100C0A);
+    --art-1: #E23A21;  --art-2: #6E5B50;  --art-3: #F0E4D6;
+    --art-1alt: #6E5B50;  --art-2alt: #E23A21;
+  }
+
+  /* 2 · ZEYTİN — esnaf lokantası, kebapçı, ev yemekleri */
+  :root[data-palette="zeytin"] {
+    --ink: #0E120D;  --ink-2: #141A12;  --surface: #1B2218;  --rule: #2B3426;
+    --accent: #C9A227;  --accent-ink: #14180F;
+    --text: #EFEEE2;  --muted: #99A38C;
+    --scrim: rgba(14,18,13,.94);
+    --glow-1: rgba(201,162,39,.11);  --glow-2: rgba(201,162,39,.05);
+    --art-bg: linear-gradient(155deg, #232C1E, #141A12);
+    --art-bg-2: linear-gradient(25deg, #1E2619, #10150E);
+    --art-1: #C9A227;  --art-2: #5E6B52;  --art-3: #EDEBD8;
+    --art-1alt: #5E6B52;  --art-2alt: #C9A227;
+  }
+
+  /* 3 · MÜREKKEP — balık restoranı, meyhane, deniz ürünleri */
+  :root[data-palette="murekkep"] {
+    --ink: #08131C;  --ink-2: #0D1B26;  --surface: #12232F;  --rule: #1E3542;
+    --accent: #D2793E;  --accent-ink: #0A1620;
+    --text: #E9F0F4;  --muted: #8AA3B0;
+    --scrim: rgba(8,19,28,.94);
+    --glow-1: rgba(210,121,62,.12);  --glow-2: rgba(210,121,62,.05);
+    --art-bg: linear-gradient(155deg, #142834, #0C1A24);
+    --art-bg-2: linear-gradient(25deg, #102230, #091620);
+    --art-1: #D2793E;  --art-2: #4A6B7C;  --art-3: #E6EEF2;
+    --art-1alt: #4A6B7C;  --art-2alt: #D2793E;
+  }
+
+  /* 4 · KÂĞIT — kahvaltı salonu, pastane, kafe (açık tema) */
+  :root[data-palette="kagit"] {
+    --ink: #F5F1E8;  --ink-2: #EFE9DC;  --surface: #FFFFFF;  --rule: #DFD6C5;
+    --accent: #7E2B3C;  --accent-ink: #FFF6F2;
+    --text: #1E1A16;  --muted: #7A6E5F;
+    --scrim: rgba(245,241,232,.94);
+    --glow-1: rgba(126,43,60,.07);  --glow-2: rgba(126,43,60,.04);
+    --art-bg: linear-gradient(155deg, #EFE7D6, #E4DAC4);
+    --art-bg-2: linear-gradient(25deg, #EAE1CE, #F3ECDD);
+    --art-1: #7E2B3C;  --art-2: #B5A489;  --art-3: #FBF7EE;
+    --art-1alt: #B5A489;  --art-2alt: #7E2B3C;
+  }
+
+  /* ------------------------------------------------------------------ TEMEL */
+
+  :root {
+    --display: "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow",
+               "Helvetica Neue", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --num: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --pad: clamp(16px, 5vw, 26px);
+    --maxw: 640px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.4;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    transition: background .35s ease, color .35s ease;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(120% 55% at 50% 0%, var(--glow-1), transparent 60%),
+      radial-gradient(90% 45% at 50% 100%, var(--glow-2), transparent 65%);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  /* --------------------------------------------------------------- BAŞLIK */
+
+  header.masthead {
+    padding: clamp(28px, 8vw, 48px) var(--pad) clamp(18px, 5vw, 28px);
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .tagline {
+    margin: 0;
+    padding-left: .34em;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .34em;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .mark {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    font-size: clamp(30px, 10vw, 46px);
+    line-height: .95;
+    text-wrap: balance;
+  }
+  .mark em { font-style: normal; color: var(--accent); }
+
+  .rule-mark { width: 54px; height: 3px; background: var(--accent); }
+
+  /* ------------------------------------------------- KATEGORİ ŞERİDİ */
+
+  nav.jump {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--scrim);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .jump-track {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 10px var(--pad);
+    scroll-padding-inline: var(--pad);
+  }
+  .jump-track::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex: 0 0 auto;
+    padding: 7px 13px;
+    border: 1px solid var(--rule);
+    background: var(--ink-2);
+    color: var(--muted);
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .chip:hover { color: var(--text); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip[aria-current="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* ------------------------------------------------------------ BÖLÜMLER */
+
+  section.course { scroll-margin-top: 60px; }
+
+  .course-head {
+    margin: 0;
+    padding: 9px var(--pad);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .13em;
+    font-size: clamp(15px, 4.4vw, 18px);
+  }
+
+  .items {
+    list-style: none;
+    margin: 0;
+    padding: 4px var(--pad) 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .item:last-child { border-bottom: 0; }
+
+  .thumb {
+    width: 64px;
+    height: 64px;
+    background: var(--art-bg);
+    overflow: hidden;
+    display: block;
+  }
+  .thumb svg { width: 100%; height: 100%; display: block; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Aynı çizim alt alta tekrarlandığında tek tip görünmesin diye
+     her satır dört varyanttan birini alır: renk vurgusu ve zemin döner. */
+  .thumb[data-v="1"], .thumb[data-v="3"] {
+    --art-1: var(--art-1alt);
+    --art-2: var(--art-2alt);
+  }
+  .thumb[data-v="2"], .thumb[data-v="3"] { background: var(--art-bg-2); }
+
+  .item-name { font-weight: 500; }
+
+  .item-note {
+    display: block;
+    margin-top: 3px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+
+  .item-price {
+    font-family: var(--num);
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .item-price .cur { color: var(--muted); font-size: 12px; margin-left: 3px; }
+
+  /* --------------------------------------------------- SPESİYAL KARTI */
+
+  .item.hero {
+    display: block;
+    padding: 0;
+    margin: 14px 0 4px;
+    border-bottom: 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .hero-art {
+    aspect-ratio: 16 / 7;
+    background: var(--art-bg);
+    display: grid;
+    place-items: center;
+  }
+  .hero-art svg { width: 46%; max-width: 150px; height: auto; }
+  .hero-art img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-body {
+    padding: 14px 16px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: baseline;
+  }
+
+  .hero-tag {
+    grid-column: 1 / -1;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: 10.5px;
+    color: var(--accent);
+  }
+
+  .hero-name {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-size: 21px;
+    line-height: 1.05;
+  }
+
+  .hero-price {
+    margin: 0;
+    font-family: var(--num);
+    font-variant-numeric: tabular-nums;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .hero-price .cur { color: var(--muted); font-size: 12px; margin-left: 3px; }
+
+  .hero-desc {
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ----------------------------------------------------------- ALT BİLGİ */
+
+  footer.foot {
+    margin-top: 10px;
+    padding: 28px var(--pad) 0;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  footer.foot p { margin: 0; }
+  footer.foot strong {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-weight: 700;
+    color: var(--text);
+    font-size: 12px;
+  }
+  .updated { font-family: var(--num); font-size: 11px; }
+
+  /* ------------------------------------------- RENK ŞEMASI BARI (demo) */
+
+  .palette-bar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--scrim);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .palette-bar[hidden] { display: none; }
+
+  .pb-label {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    font-size: 10px;
+    color: var(--muted);
+    padding-left: 4px;
+  }
+
+  .pb-swatches { display: flex; gap: 6px; }
+
+  .swatch {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(128,128,128,.45);
+    cursor: pointer;
+    position: relative;
+    transition: transform .18s ease;
+  }
+  .swatch:hover { transform: scale(1.12); }
+  .swatch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .swatch[aria-pressed="true"] { transform: scale(1.15); border-color: var(--text); }
+  .swatch[aria-pressed="true"]::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+  }
+
+  .pb-close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .pb-close:hover { color: var(--text); }
+  .pb-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .pb-reopen {
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 40;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: var(--scrim);
+    color: var(--muted);
+    font-family: var(--display);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .pb-reopen[hidden] { display: none; }
+  .pb-reopen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  html { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<!-- Ürün çizimleri. Gerçek fotoğraf eklenince bunlar otomatik devre dışı kalır. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="art-corba" viewBox="0 0 64 64">
+      <path d="M22 20c0-4 4-4.5 4-8M32 18c0-4 4-4.5 4-8M42 20c0-4 4-4.5 4-8"
+            stroke="var(--art-2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M9 33h46a23 23 0 0 1-46 0z" fill="var(--art-1)"/>
+      <rect x="5" y="29" width="54" height="5.5" rx="2.75" fill="var(--art-2)"/>
+      <ellipse cx="32" cy="42" rx="10" ry="3" fill="var(--art-3)" opacity=".35"/>
+    </symbol>
+
+    <symbol id="art-menemen" viewBox="0 0 64 64">
+      <rect x="42" y="30" width="20" height="6" rx="3" fill="var(--art-2)"/>
+      <circle cx="27" cy="33" r="21" fill="var(--art-2)"/>
+      <circle cx="27" cy="33" r="16" fill="var(--art-1)"/>
+      <circle cx="22" cy="29" r="4.5" fill="var(--art-3)"/>
+      <circle cx="32" cy="38" r="4.5" fill="var(--art-3)"/>
+      <circle cx="22" cy="29" r="2" fill="var(--art-1)"/>
+      <circle cx="32" cy="38" r="2" fill="var(--art-1)"/>
+    </symbol>
+
+    <symbol id="art-omlet" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="43" rx="26" ry="7" fill="var(--art-2)"/>
+      <path d="M11 42c1-15 12-22 21-22s20 7 21 22z" fill="var(--art-1)"/>
+      <path d="M21 41c1-9 7-14 13-15" stroke="var(--art-3)" stroke-width="2.5"
+            fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-peynir" viewBox="0 0 64 64">
+      <rect x="4" y="43" width="56" height="5" rx="2.5" fill="var(--art-2)"/>
+      <path d="M6 43V25l26-8v26z" fill="var(--art-1)"/>
+      <circle cx="14" cy="33" r="3" fill="var(--art-3)"/>
+      <circle cx="24" cy="27" r="2.4" fill="var(--art-3)"/>
+      <circle cx="23" cy="38" r="2" fill="var(--art-3)"/>
+      <circle cx="46" cy="33" r="10" fill="var(--art-2)"/>
+      <path d="M46 23v-4" stroke="var(--art-3)" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-domates" viewBox="0 0 64 64">
+      <rect x="4" y="45" width="56" height="5" rx="2.5" fill="var(--art-2)"/>
+      <circle cx="23" cy="32" r="14" fill="var(--art-1)"/>
+      <circle cx="23" cy="32" r="7" fill="var(--art-3)" opacity=".5"/>
+      <circle cx="44" cy="37" r="9" fill="var(--art-1)"/>
+      <circle cx="44" cy="37" r="4.5" fill="var(--art-3)" opacity=".5"/>
+      <path d="M23 18v-4M44 28v-3" stroke="var(--art-2)" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-kahvalti" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="26" fill="var(--art-2)"/>
+      <circle cx="32" cy="32" r="20" fill="var(--art-3)" opacity=".22"/>
+      <path d="M18 32l7-11 7 11z" fill="var(--art-1)"/>
+      <circle cx="41" cy="26" r="6" fill="var(--art-1)"/>
+      <rect x="22" y="36" width="20" height="7" rx="3.5" fill="var(--art-1)"/>
+      <circle cx="41" cy="26" r="2.4" fill="var(--art-3)"/>
+    </symbol>
+
+    <symbol id="art-sandvic" viewBox="0 0 64 64">
+      <path d="M7 37c0-11 11-17 25-17s25 6 25 17z" fill="var(--art-1)"/>
+      <rect x="7" y="37" width="50" height="7" fill="var(--art-3)"/>
+      <path d="M7 44h50c0 6-11 9-25 9S7 50 7 44z" fill="var(--art-1)"/>
+      <path d="M14 30h8M28 27h10M44 30h6" stroke="var(--art-2)" stroke-width="2.4"
+            stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-tost" viewBox="0 0 64 64">
+      <path d="M5 48 20 15l15 33z" fill="var(--art-1)"/>
+      <path d="M28 48 43 15l16 33z" fill="var(--art-2)"/>
+      <path d="M13 41h14M35 41h15" stroke="var(--art-3)" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M18 33h6M40 33h7" stroke="var(--art-3)" stroke-width="2.6" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-tost-karisik" viewBox="0 0 64 64">
+      <path d="M5 48 20 15l15 33z" fill="var(--art-1)"/>
+      <path d="M28 48 43 15l16 33z" fill="var(--art-2)"/>
+      <circle cx="17" cy="40" r="3.4" fill="var(--art-3)"/>
+      <circle cx="25" cy="44" r="2.6" fill="var(--art-3)"/>
+      <circle cx="42" cy="41" r="3.4" fill="var(--art-3)"/>
+      <circle cx="50" cy="45" r="2.6" fill="var(--art-3)"/>
+      <path d="M14 33h9M38 33h10" stroke="var(--art-3)" stroke-width="2.4" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-tost-cift" viewBox="0 0 64 64">
+      <path d="M5 48 20 13l15 35z" fill="var(--art-1)"/>
+      <path d="M28 48 43 13l16 35z" fill="var(--art-2)"/>
+      <path d="M11 42c4 4 9 4 13 0M35 43c4 4 9 4 13 0" stroke="var(--art-3)"
+            stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M15 32c3 3 7 3 10 0M39 32c3 3 7 3 10 0" stroke="var(--art-3)"
+            stroke-width="3" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="art-durum" viewBox="0 0 64 64">
+      <g transform="rotate(-11 32 32)">
+        <rect x="21" y="9" width="22" height="47" rx="11" fill="var(--art-1)"/>
+        <path d="M21 22h22M21 34h22M21 46h22" stroke="var(--art-2)" stroke-width="2.4"/>
+        <ellipse cx="32" cy="11" rx="11" ry="4.5" fill="var(--art-3)"/>
+      </g>
+    </symbol>
+
+    <symbol id="art-kofte" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="44" rx="27" ry="8" fill="var(--art-2)"/>
+      <circle cx="21" cy="37" r="9" fill="var(--art-1)"/>
+      <circle cx="34" cy="34" r="10" fill="var(--art-1)"/>
+      <circle cx="45" cy="39" r="8" fill="var(--art-1)"/>
+      <path d="M17 35h8M30 32h8M42 37h6" stroke="var(--art-3)" stroke-width="2.2"
+            stroke-linecap="round" opacity=".7"/>
+    </symbol>
+
+    <symbol id="art-tavuk" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="45" rx="26" ry="7" fill="var(--art-2)"/>
+      <path d="M13 42c0-15 9-24 19-24s19 9 19 24z" fill="var(--art-1)"/>
+      <path d="M19 36l26 0M21 28l22 0" stroke="var(--art-3)" stroke-width="2.6"
+            stroke-linecap="round" opacity=".75"/>
+    </symbol>
+
+    <symbol id="art-patates" viewBox="0 0 64 64">
+      <g fill="var(--art-1)">
+        <rect x="18" y="12" width="6" height="24" rx="3" transform="rotate(-14 21 24)"/>
+        <rect x="29" y="8" width="6" height="28" rx="3"/>
+        <rect x="40" y="12" width="6" height="24" rx="3" transform="rotate(14 43 24)"/>
+      </g>
+      <path d="M15 28h34l-4 28H19z" fill="var(--art-2)"/>
+      <path d="M20 38h24" stroke="var(--art-3)" stroke-width="2.6" stroke-linecap="round" opacity=".6"/>
+    </symbol>
+
+    <symbol id="art-patso" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="38" rx="28" ry="16" fill="var(--art-2)"/>
+      <ellipse cx="32" cy="35" rx="20" ry="10" fill="var(--art-1)"/>
+      <circle cx="24" cy="34" r="3.2" fill="var(--art-3)"/>
+      <circle cx="34" cy="31" r="2.6" fill="var(--art-3)"/>
+      <circle cx="40" cy="37" r="3" fill="var(--art-3)"/>
+      <circle cx="30" cy="39" r="2.4" fill="var(--art-3)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="tagline">Tost &middot; Dürüm &middot; Patso</p>
+    <h1 class="mark">Arda <em>Büfe</em></h1>
+    <div class="rule-mark"></div>
+  </header>
+
+  <nav class="jump" aria-label="Menü bölümleri">
+    <div class="jump-track" id="jumpTrack"></div>
+  </nav>
+
+  <main id="menuRoot"></main>
+
+  <footer class="foot">
+    <strong>Afiyet olsun</strong>
+    <p>Fiyatlarımıza KDV dahildir.</p>
+    <p class="updated" id="updated"></p>
+  </footer>
+</div>
+
+<div class="palette-bar" id="paletteBar" role="group" aria-label="Renk şeması seçimi">
+  <span class="pb-label">Renk<br />şeması</span>
+  <div class="pb-swatches" id="paletteSwatches"></div>
+  <button class="pb-close" id="paletteClose" aria-label="Renk şeması barını gizle">&times;</button>
+</div>
+<button class="pb-reopen" id="paletteReopen" hidden aria-label="Renk şeması barını göster">Tema</button>
+
+<script>
+  /* ==========================================================================
+     1) RENK ŞEMALARI
+     Yeni tema eklemek için: yukarıda :root[data-palette="ad"] bloğu aç,
+     buraya da bir satır ekle.
+     ========================================================================== */
+  const PALETLER = [
+    { id: "komur",    ad: "Kömür",    icin: "Büfe, tost salonu, ocakbaşı", ground: "#0C0A09", accent: "#E23A21" },
+    { id: "zeytin",   ad: "Zeytin",   icin: "Esnaf lokantası, kebapçı",    ground: "#0E120D", accent: "#C9A227" },
+    { id: "murekkep", ad: "Mürekkep", icin: "Balık restoranı, meyhane",    ground: "#08131C", accent: "#D2793E" },
+    { id: "kagit",    ad: "Kâğıt",    icin: "Kahvaltı salonu, pastane",    ground: "#F5F1E8", accent: "#7E2B3C" }
+  ];
+  const VARSAYILAN_PALET = "komur";
+
+  /* ==========================================================================
+     2) MENÜ VERİSİ
+     name  → ürün adı
+     price → yazıldığı gibi görünür ("90,00 – 100,00" gibi aralık da olur)
+     art   → çizim adı; bölümün "art" değeri varsayılan, ürün kendi değerini ezer
+     photo → "foto/tost.jpg" verirsen çizim yerine gerçek fotoğraf gelir (kare kırpılır)
+     note  → ürünün altına küçük açıklama satırı
+     star  → true ise ürün büyük spesiyal kartı olarak gösterilir
+     ========================================================================== */
+  const GUNCELLEME = "17.08.2026";
+
+  const MENU = [
+    {
+      id: "corba", nav: "Çorba", title: "Çorba", art: "corba",
+      items: [
+        { name: "Günün Çorbası", price: "75,00", note: "Her gün taze, tereyağı ve limonla" }
+      ]
+    },
+    {
+      id: "kahvaltilar", nav: "Kahvaltı", title: "Kahvaltılar", art: "kahvalti",
+      items: [
+        { name: "Menemen",         price: "140,00", art: "menemen" },
+        { name: "Kaşarlı Menemen", price: "160,00", art: "menemen" },
+        { name: "Karışık Menemen", price: "185,00", art: "menemen", note: "Sucuk, kaşar, biber" },
+        { name: "Omlet",           price: "140,00", art: "omlet" },
+        { name: "Kaşarlı Omlet",   price: "160,00", art: "omlet" },
+        { name: "Karışık Omlet",   price: "185,00", art: "omlet" },
+        { name: "Peynir Tabağı",   price: "140,00", art: "peynir" },
+        { name: "Domates Tabağı",  price: "120,00", art: "domates" },
+        { name: "Kahvaltı Tabağı", price: "200,00", art: "kahvalti", note: "Peynir, zeytin, domates, salatalık, reçel" },
+        { name: "Soğuk Sandviç",   price: "90,00 – 100,00", art: "sandvic" }
+      ]
+    },
+    {
+      id: "tostlar", nav: "Tostlar", title: "Tostlar", art: "tost",
+      items: [
+        { name: "Kaşarlı Tost",                price: "80,00"  },
+        { name: "Karışık Tost",                price: "90,00",  art: "tost-karisik" },
+        { name: "Beyaz Peynir Domatesli Tost", price: "145,00", art: "tost-karisik" },
+        { name: "Çift Kaşarlı Tost",           price: "145,00", art: "tost-cift" },
+        { name: "Ayvalık Tostu",               price: "165,00", art: "tost-karisik", note: "Sucuk, kaşar, salam, turşu, ketçap" },
+        { name: "Kavurmalı Tost",              price: "175,00" },
+        { name: "Çift Kaşarlı Karışık Tost",   price: "170,00", art: "tost-cift" },
+        { name: "Çift Kaşarlı Kavurmalı Tost", price: "200,00", art: "tost-cift" },
+        {
+          name: "Arda Tost", price: "210,00", star: true,
+          tag: "Evin spesiyali",
+          note: "Çift kaşar, kavurma, sucuk ve közlenmiş biber"
+        }
+      ]
+    },
+    {
+      id: "ana-yemekler", nav: "Ana Yemekler", title: "Ana Yemekler", art: "kofte",
+      items: [
+        { name: "Köfte Sandviç",         price: "145,00", art: "sandvic" },
+        { name: "Köfte Dürüm",           price: "155,00", art: "durum" },
+        { name: "Kaşarlı Köfte Dürüm",   price: "175,00", art: "durum" },
+        { name: "Porsiyon Köfte",        price: "290,00", art: "kofte", note: "Pilav, patates ve salata ile" },
+        { name: "Izgara Tavuk Sandviç",  price: "140,00", art: "sandvic" },
+        { name: "Izgara Tavuk Dürüm",    price: "150,00", art: "durum" },
+        { name: "Kaşarlı Tavuk Dürüm",   price: "155,00", art: "durum" },
+        { name: "Izgara Tavuk Porsiyon", price: "270,00", art: "tavuk", note: "Pilav, patates ve salata ile" }
+      ]
+    },
+    {
+      id: "patso", nav: "Patso", title: "Patso", art: "patso",
+      items: [
+        { name: "Porsiyon Patates", price: "140,00", art: "patates" },
+        { name: "Sade Patso",       price: "130,00" },
+        { name: "Sosisli Patso",    price: "160,00" },
+        { name: "Kaşarlı Patso",    price: "160,00" },
+        { name: "Amerikanlı Patso", price: "160,00" },
+        { name: "Sucuklu Patso",    price: "185,00" },
+        { name: "Karışık Patso",    price: "200,00", note: "Sosis, sucuk, kaşar, mısır, turşu" }
+      ]
+    }
+  ];
+
+  /* ==========================================================================
+     3) SAYFAYI KUR
+     ========================================================================== */
+
+  // Türkçe dil etiketi: CSS'in otomatik büyük harfi "i" yerine "İ" üretsin
+  document.documentElement.lang = "tr";
+
+  const root  = document.getElementById("menuRoot");
+  const track = document.getElementById("jumpTrack");
+
+  /** Ürün görseli: fotoğraf varsa fotoğraf, yoksa çizim. */
+  function gorselYap(item, varsayilanArt, sinif, varyant) {
+    const box = document.createElement("div");
+    box.className = sinif;
+    if (varyant !== undefined) box.dataset.v = String(varyant % 4);
+
+    if (item.photo) {
+      const img = document.createElement("img");
+      img.src = item.photo;
+      img.alt = item.name;
+      img.loading = "lazy";
+      box.appendChild(img);
+      return box;
+    }
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 64 64");
+    svg.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttribute("href", "#art-" + (item.art || varsayilanArt || "tost"));
+    svg.appendChild(use);
+    box.appendChild(svg);
+    return box;
+  }
+
+  function fiyatYap(item, sinif) {
+    const el = document.createElement("p");
+    el.className = sinif;
+    el.textContent = item.price;
+    const cur = document.createElement("span");
+    cur.className = "cur";
+    cur.textContent = "TL";
+    el.appendChild(cur);
+    return el;
+  }
+
+  for (const course of MENU) {
+    const chip = document.createElement("a");
+    chip.className = "chip";
+    chip.href = "#" + course.id;
+    chip.textContent = course.nav;
+    chip.dataset.target = course.id;
+    track.appendChild(chip);
+
+    const section = document.createElement("section");
+    section.className = "course";
+    section.id = course.id;
+
+    const head = document.createElement("h2");
+    head.className = "course-head";
+    head.textContent = course.title;
+    section.appendChild(head);
+
+    const list = document.createElement("ul");
+    list.className = "items";
+
+    let sira = 0;
+
+    for (const item of course.items) {
+      const li = document.createElement("li");
+
+      if (item.star) {
+        li.className = "item hero";
+        li.appendChild(gorselYap(item, course.art, "hero-art"));
+
+        const body = document.createElement("div");
+        body.className = "hero-body";
+
+        if (item.tag) {
+          const tag = document.createElement("span");
+          tag.className = "hero-tag";
+          tag.textContent = item.tag;
+          body.appendChild(tag);
+        }
+
+        const name = document.createElement("h3");
+        name.className = "hero-name";
+        name.textContent = item.name;
+        body.appendChild(name);
+
+        body.appendChild(fiyatYap(item, "hero-price"));
+
+        if (item.note) {
+          const desc = document.createElement("p");
+          desc.className = "hero-desc";
+          desc.textContent = item.note;
+          body.appendChild(desc);
+        }
+
+        li.appendChild(body);
+        list.appendChild(li);
+        continue;
+      }
+
+      li.className = "item";
+      li.appendChild(gorselYap(item, course.art, "thumb", sira++));
+
+      const name = document.createElement("div");
+      name.className = "item-name";
+      name.textContent = item.name;
+      if (item.note) {
+        const note = document.createElement("span");
+        note.className = "item-note";
+        note.textContent = item.note;
+        name.appendChild(note);
+      }
+      li.appendChild(name);
+      li.appendChild(fiyatYap(item, "item-price"));
+      list.appendChild(li);
+    }
+
+    section.appendChild(list);
+    root.appendChild(section);
+  }
+
+  document.getElementById("updated").textContent = "Son güncelleme " + GUNCELLEME;
+
+  /* --- Kaydırdıkça üstteki şeritte aktif bölümü işaretle --- */
+
+  const chips = new Map([...track.querySelectorAll(".chip")].map(c => [c.dataset.target, c]));
+
+  const observer = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      for (const c of chips.values()) c.removeAttribute("aria-current");
+      const active = chips.get(entry.target.id);
+      if (!active) continue;
+      active.setAttribute("aria-current", "true");
+      active.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
+  }, { rootMargin: "-56px 0px -70% 0px", threshold: 0 });
+
+  for (const section of root.querySelectorAll(".course")) observer.observe(section);
+
+  /* --- Renk şeması barı --- */
+
+  const swatchBox = document.getElementById("paletteSwatches");
+  const bar       = document.getElementById("paletteBar");
+  const closeBtn  = document.getElementById("paletteClose");
+  const reopenBtn = document.getElementById("paletteReopen");
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  function paletUygula(id) {
+    const p = PALETLER.find(x => x.id === id) || PALETLER[0];
+    document.documentElement.dataset.palette = p.id;
+    if (themeMeta) themeMeta.setAttribute("content", p.ground);
+    for (const btn of swatchBox.children) {
+      btn.setAttribute("aria-pressed", String(btn.dataset.palette === p.id));
+    }
+    try { localStorage.setItem("qrmenu-palet", p.id); } catch (e) { /* gizli sekme */ }
+  }
+
+  for (const p of PALETLER) {
+    const btn = document.createElement("button");
+    btn.className = "swatch";
+    btn.type = "button";
+    btn.dataset.palette = p.id;
+    btn.title = p.ad + " — " + p.icin;
+    btn.setAttribute("aria-label", p.ad + " renk şeması. " + p.icin + ".");
+    btn.style.background =
+      "linear-gradient(135deg, " + p.ground + " 0 50%, " + p.accent + " 50% 100%)";
+    btn.addEventListener("click", () => paletUygula(p.id));
+    swatchBox.appendChild(btn);
+  }
+
+  let kayitli = null;
+  try { kayitli = localStorage.getItem("qrmenu-palet"); } catch (e) { /* gizli sekme */ }
+  paletUygula(kayitli || VARSAYILAN_PALET);
+
+  closeBtn.addEventListener("click", () => {
+    bar.hidden = true;
+    reopenBtn.hidden = false;
+    reopenBtn.focus();
+  });
+  reopenBtn.addEventListener("click", () => {
+    bar.hidden = false;
+    reopenBtn.hidden = true;
+    closeBtn.focus();
+  });
+</script>
