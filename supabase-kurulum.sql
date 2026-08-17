@@ -21,7 +21,14 @@ create index if not exists siparisler_olusturma_idx on siparisler (olusturma des
 create index if not exists siparisler_durum_idx on siparisler (durum);
 
 -- Canlı güncelleme (mutfak paneli anında görsün)
-alter publication supabase_realtime add table siparisler;
+-- Tablo zaten eklenmişse hata vermesin diye sarmalanmıştır: Supabase SQL Editor
+-- tüm dosyayı tek parça çalıştırır, tek satır patlarsa HEPSİ geri alınır.
+do $$
+begin
+  alter publication supabase_realtime add table siparisler;
+exception
+  when duplicate_object then null;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- GÜVENLİK
