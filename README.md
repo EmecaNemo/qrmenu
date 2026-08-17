@@ -122,13 +122,18 @@ biri `index.html?masa=5`, diğeri `panel.html`. Sipariş ver, panele anında dü
 
 1. [supabase.com](https://supabase.com) üzerinde ücretsiz bir proje aç
 2. SQL Editor'e `supabase-kurulum.sql` dosyasını yapıştır ve çalıştır
-3. Settings → API'den **Project URL** ve **anon public key** değerlerini kopyala
-4. `siparis-servisi.js` içindeki `SiparisAyar` bloğuna gir, `mod`'u `"supabase"` yap
-5. `git push` ile yayına al
-6. İki ayrı cihazdan test et: telefondan sipariş ver, tablette görün
+3. **Project URL**'i al — en kolayı panelin adres çubuğu:
+   `supabase.com/dashboard/project/<proje-kodu>` → URL'in `https://<proje-kodu>.supabase.co`
+   (Panelden: Settings → Data API → Project URL)
+4. **API anahtarı**nı al: Settings → API Keys → *publishable* anahtar (`sb_publishable_…`)
+5. İkisini `siparis-servisi.js` içindeki `SiparisAyar` bloğuna gir
+6. `?supabase=1` ile dene (aşağıya bak), çalıştığını gördükten sonra
+   `SiparisAyar.mod` değerini `"supabase"` yap
+7. `git push` ile yayına al, iki ayrı cihazdan test et
 
-> Panel adresine `?supabase=1` eklersen dosyayı değiştirmeden sunucu modunu
-> deneyebilirsin: `panel.html?supabase=1`
+> **Dosyayı değiştirmeden denemek:** adrese `?supabase=1` ekle.
+> `panel.html?supabase=1` · `index.html?masa=5&supabase=1`
+> Böylece yerel demo bozulmadan gerçek sunucuyu test edebilirsin.
 
 ### Bilinmesi gerekenler
 

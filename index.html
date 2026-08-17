@@ -1055,9 +1055,15 @@
   const root  = document.getElementById("menuRoot");
   const track = document.getElementById("jumpTrack");
 
+  const adresAyar = new URLSearchParams(location.search);
+
   // Masa numarası adresten gelir: ...?masa=5  → yoksa menü salt okunur kalır
-  const MASA = (new URLSearchParams(location.search).get("masa") || "").trim();
+  const MASA = (adresAyar.get("masa") || "").trim();
   const siparisAcik = MASA !== "";
+
+  // ?supabase=1 → gerçek sunucu modunu dosyayı değiştirmeden dene.
+  // Kalıcı açmak için siparis-servisi.js içindeki SiparisAyar.mod değerini değiştir.
+  if (adresAyar.get("supabase") === "1") window.SiparisAyar.mod = "supabase";
 
   const ekleDugmeleri = new Map();   // ürün adı → "+" düğmesi
   const sepet = new Map();           // ürün adı → { ad, fiyat, fiyatMetin, adet }

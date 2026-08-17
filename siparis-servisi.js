@@ -27,8 +27,15 @@
 window.SiparisAyar = {
   mod: "yerel",                     // "yerel" veya "supabase"
   supabase: {
-    url: "",                        // https://xxxx.supabase.co
-    anonKey: ""                     // public anon key
+    // Supabase panelinde: adres çubuğundaki proje kodu → https://<kod>.supabase.co
+    // ya da Settings → Data API → Project URL
+    url: "https://tyftwhvwcmzuxwuhnuuw.supabase.co",
+
+    // Yeni nesil "publishable" anahtar ya da eski "anon public" anahtar.
+    // Bu anahtar istemci tarafında kullanılmak üzere tasarlanmıştır, gizli değildir.
+    // Erişimi belirleyen şey anahtar değil, veritabanındaki RLS kurallarıdır —
+    // supabase-kurulum.sql içindeki güvenlik notlarını oku.
+    apiKey: "sb_publishable_UjqqPAuccQCJbDFwrGEm9A_H0uo6RPG"
   }
 };
 
@@ -117,11 +124,14 @@ window.SiparisServisi = (function () {
 
   async function supabaseBaslat() {
     const ayar = AYAR().supabase;
-    if (!ayar.url || !ayar.anonKey) {
-      throw new Error("Supabase url ve anonKey girilmemiş — siparis-servisi.js içindeki AYAR bloğuna bak.");
+    if (!ayar.url) {
+      throw new Error("Supabase proje URL'i girilmemiş — siparis-servisi.js içindeki SiparisAyar bloğuna bak.");
+    }
+    if (!ayar.apiKey) {
+      throw new Error("Supabase API anahtarı girilmemiş — siparis-servisi.js içindeki SiparisAyar bloğuna bak.");
     }
     await kutuphaneYukle();
-    sb = window.supabase.createClient(ayar.url, ayar.anonKey);
+    sb = window.supabase.createClient(ayar.url, ayar.apiKey);
 
     const { data, error } = await sb.from("siparisler").select("*").order("olusturma", { ascending: false });
     if (error) throw error;

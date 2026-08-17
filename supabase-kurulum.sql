@@ -2,7 +2,7 @@
 -- SİPARİŞ SİSTEMİ — Supabase kurulumu
 -- ============================================================================
 -- Bunu Supabase panelinde SQL Editor'e yapıştırıp çalıştır.
--- Sonra siparis-servisi.js içindeki SiparisAyar bloğuna url + anonKey gir
+-- Sonra siparis-servisi.js içindeki SiparisAyar bloğuna url + apiKey gir
 -- ve mod'u "supabase" yap.
 -- ============================================================================
 
