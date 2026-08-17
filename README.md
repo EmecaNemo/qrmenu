@@ -185,6 +185,14 @@ git add -A && git commit -m "fiyat güncellemesi" && git push
 Bir dakika içinde <https://emecanemo.github.io/qrmenu/> güncellenir. **QR değişmez** —
 basılı kartlar aynen çalışmaya devam eder.
 
+> **Önbellek tuzağı:** `siparis-servisi.js` dosyasını değiştirdiysen,
+> `index.html` ve `panel.html` içindeki `siparis-servisi.js?v=2` numarasını
+> ikisinde birden artır. Yoksa tarayıcılar eski dosyayı saatlerce servis eder
+> ve "güncelledim ama değişmedi" derdine düşersin.
+>
+> Sayfaların kendisi de ~10 dakika önbellekte kalır. Fiyat değişikliğinden
+> hemen sonra test edeceksen tarayıcıda sert yenileme yap (Cmd+Shift+R).
+
 ## Notlar
 
 - Menü fotoğrafı kısmiydi: **içecekler ve tatlılar** bu listede yok.
