@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>Mutfak Paneli — Arda Büfe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0C0A09" />
+<style>
+  /* Mutfak paneli: tablette açık durur, uzaktan okunur, tek eliyle kullanılır. */
+  :root {
+    --ink: #0C0A09;  --ink-2: #14100E;  --surface: #1A1512;  --rule: #2E2521;
+    --accent: #E23A21;  --text: #F6F0EA;  --muted: #A2938A;
+    --yeni: #E23A21;  --hazirlaniyor: #D89B2A;  --hazir: #3FA96A;  --teslim: #5C6B72;
+
+    --display: "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow",
+               "Helvetica Neue", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --num: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.35;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ------------------------------------------------------------- üst bar */
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(12,10,9,.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 18px calc(12px + env(safe-area-inset-left, 0px)) ;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+  }
+
+  .baslik {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 17px;
+  }
+  .baslik em { font-style: normal; color: var(--accent); }
+
+  .baglanti {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--hazir); }
+  .nokta.uyari { background: var(--hazirlaniyor); }
+  .nokta.hata  { background: var(--yeni); }
+
+  .filtreler { display: flex; gap: 7px; margin-left: auto; flex-wrap: wrap; }
+
+  .filtre {
+    padding: 7px 13px;
+    border: 1px solid var(--rule);
+    background: var(--ink-2);
+    color: var(--muted);
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .filtre[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filtre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .sayac {
+    font-family: var(--num);
+    font-size: 11px;
+    margin-left: 5px;
+    opacity: .8;
+  }
+
+  /* ----------------------------------------------------------- siparişler */
+
+  main {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    align-items: start;
+  }
+
+  .siparis {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 5px solid var(--durum-renk, var(--rule));
+    display: flex;
+    flex-direction: column;
+  }
+  .siparis.yeni { --durum-renk: var(--yeni); }
+  .siparis.hazirlaniyor { --durum-renk: var(--hazirlaniyor); }
+  .siparis.hazir { --durum-renk: var(--hazir); }
+  .siparis.teslim { --durum-renk: var(--teslim); opacity: .55; }
+  .siparis.iptal  { --durum-renk: var(--teslim); opacity: .4; }
+
+  /* Yeni sipariş göze çarpsın */
+  .siparis.yeni { animation: dikkat 1.4s ease-out 3; }
+  @keyframes dikkat {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(226,58,33,0); }
+    50%      { box-shadow: 0 0 0 4px rgba(226,58,33,.28); }
+  }
+
+  .s-ust {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .masa {
+    font-family: var(--display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 20px;
+  }
+
+  .rozet {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    color: #0C0A09;
+    background: var(--durum-renk);
+  }
+
+  .saat {
+    margin-left: auto;
+    font-family: var(--num);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .urunler { list-style: none; margin: 0; padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; }
+  .urun { display: flex; gap: 10px; align-items: baseline; }
+  .adet {
+    font-family: var(--num);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    min-width: 2.2em;
+  }
+  .urun-ad { flex: 1; }
+  .urun-fiyat { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+
+  .not {
+    margin: 0 14px 10px;
+    padding: 9px 11px;
+    background: var(--ink-2);
+    border-left: 3px solid var(--hazirlaniyor);
+    font-size: 13.5px;
+  }
+  .not b {
+    display: block;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 10px;
+    color: var(--hazirlaniyor);
+    margin-bottom: 3px;
+  }
+
+  .toplam {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--num);
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+  .toplam span:first-child {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .eylemler { display: flex; gap: 1px; background: var(--rule); border-top: 1px solid var(--rule); }
+
+  .eylem {
+    flex: 1;
+    padding: 13px 8px;
+    border: 0;
+    background: var(--ink-2);
+    color: var(--text);
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .eylem:hover { background: #221B17; }
+  .eylem:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .eylem.birincil { background: var(--accent); color: #fff; }
+  .eylem.birincil:hover { filter: brightness(1.1); }
+  .eylem.olumlu { background: var(--hazir); color: #06210F; }
+  .eylem.olumlu:hover { filter: brightness(1.1); }
+
+  /* --------------------------------------------------------------- boşluk */
+
+  .bos {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bos strong {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .uyari-kutu {
+    grid-column: 1 / -1;
+    padding: 14px 16px;
+    background: var(--ink-2);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--hazirlaniyor);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .uyari-kutu b { color: var(--text); }
+
+  footer {
+    padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .kucuk {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    padding: 8px 14px;
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .kucuk:hover { color: var(--text); }
+  .kucuk:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .siparis.yeni { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="baslik">Arda <em>Büfe</em> · Mutfak</h1>
+  <span class="baglanti"><span class="nokta" id="durumNokta"></span><span id="durumYazi">Bağlanıyor</span></span>
+  <div class="filtreler" id="filtreler"></div>
+</header>
+
+<main id="liste"></main>
+
+<footer>
+  <button class="kucuk" id="sesAc">🔔 Sesi aç</button>
+  <button class="kucuk" id="sifirla">Demo siparişlerini sil</button>
+</footer>
+
+<script src="siparis-servisi.js"></script>
+<script>
+  "use strict";
+
+  /* Panel adresine ?supabase=1 eklenirse gerçek sunucu modu denenir.
+     Kalıcı olarak açmak için siparis-servisi.js içindeki AYAR bloğunu düzenle. */
+  const urlAyar = new URLSearchParams(location.search);
+  if (urlAyar.get("supabase") === "1") window.SiparisAyar.mod = "supabase";
+
+  const DURUM_ADI = {
+    yeni: "Yeni",
+    hazirlaniyor: "Hazırlanıyor",
+    hazir: "Hazır",
+    teslim: "Teslim edildi",
+    iptal: "İptal"
+  };
+
+  const FILTRELER = [
+    { id: "aktif",  ad: "Aktif",  durumlar: ["yeni", "hazirlaniyor"] },
+    { id: "hazir",  ad: "Hazır",  durumlar: ["hazir"] },
+    { id: "gecmis", ad: "Geçmiş", durumlar: ["teslim", "iptal"] },
+    { id: "hepsi",  ad: "Hepsi",  durumlar: null }
+  ];
+
+  let aktifFiltre = "aktif";
+  let sonListe = [];
+  let bilinenIdler = new Set();
+  let ilkYukleme = true;
+  let sesAcik = false;
+
+  const listeEl   = document.getElementById("liste");
+  const filtreEl  = document.getElementById("filtreler");
+  const noktaEl   = document.getElementById("durumNokta");
+  const yaziEl    = document.getElementById("durumYazi");
+
+  /* --------------------------------------------------------------- ses */
+
+  let sesBaglami = null;
+
+  function sesCal() {
+    if (!sesAcik || !sesBaglami) return;
+    const t = sesBaglami.currentTime;
+    for (let i = 0; i < 2; i++) {
+      const osc = sesBaglami.createOscillator();
+      const kaz = sesBaglami.createGain();
+      osc.type = "sine";
+      osc.frequency.value = i === 0 ? 880 : 1180;
+      kaz.gain.setValueAtTime(0.0001, t + i * 0.16);
+      kaz.gain.exponentialRampToValueAtTime(0.22, t + i * 0.16 + 0.02);
+      kaz.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.16 + 0.14);
+      osc.connect(kaz).connect(sesBaglami.destination);
+      osc.start(t + i * 0.16);
+      osc.stop(t + i * 0.16 + 0.16);
+    }
+  }
+
+  document.getElementById("sesAc").addEventListener("click", function () {
+    if (!sesBaglami) sesBaglami = new (window.AudioContext || window.webkitAudioContext)();
+    sesBaglami.resume();
+    sesAcik = !sesAcik;
+    this.textContent = sesAcik ? "🔔 Ses açık" : "🔕 Sesi aç";
+    if (sesAcik) sesCal();
+  });
+
+  /* ----------------------------------------------------------- filtreler */
+
+  for (const f of FILTRELER) {
+    const b = document.createElement("button");
+    b.className = "filtre";
+    b.type = "button";
+    b.dataset.filtre = f.id;
+    b.innerHTML = f.ad + ' <span class="sayac"></span>';
+    b.addEventListener("click", () => { aktifFiltre = f.id; ciz(sonListe); });
+    filtreEl.appendChild(b);
+  }
+
+  /* ---------------------------------------------------------------- çizim */
+
+  function saatYaz(zaman) {
+    const d = new Date(zaman);
+    const fark = Math.floor((Date.now() - zaman) / 60000);
+    const saat = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+    if (fark < 1) return saat + " · şimdi";
+    if (fark < 60) return saat + " · " + fark + " dk";
+    return saat;
+  }
+
+  function kartYap(s) {
+    const kart = document.createElement("article");
+    kart.className = "siparis " + s.durum;
+
+    const ust = document.createElement("div");
+    ust.className = "s-ust";
+    ust.innerHTML =
+      '<span class="masa">Masa ' + s.masa + '</span>' +
+      '<span class="rozet">' + DURUM_ADI[s.durum] + '</span>' +
+      '<span class="saat">' + saatYaz(s.olusturma) + '</span>';
+    kart.appendChild(ust);
+
+    const ul = document.createElement("ul");
+    ul.className = "urunler";
+    for (const u of s.urunler) {
+      const li = document.createElement("li");
+      li.className = "urun";
+      const adet = document.createElement("span");
+      adet.className = "adet";
+      adet.textContent = u.adet + "×";
+      const ad = document.createElement("span");
+      ad.className = "urun-ad";
+      ad.textContent = u.ad;
+      const fiyat = document.createElement("span");
+      fiyat.className = "urun-fiyat";
+      fiyat.textContent = SiparisServisi.paraYaz(u.fiyat * u.adet);
+      li.append(adet, ad, fiyat);
+      ul.appendChild(li);
+    }
+    kart.appendChild(ul);
+
+    if (s.siparisNotu) {
+      const not = document.createElement("div");
+      not.className = "not";
+      const b = document.createElement("b");
+      b.textContent = "Müşteri notu";
+      not.appendChild(b);
+      not.appendChild(document.createTextNode(s.siparisNotu));
+      kart.appendChild(not);
+    }
+
+    const toplam = document.createElement("div");
+    toplam.className = "toplam";
+    toplam.innerHTML = "<span>Toplam</span><span>" + SiparisServisi.paraYaz(s.toplam) + " TL</span>";
+    kart.appendChild(toplam);
+
+    const eylemler = document.createElement("div");
+    eylemler.className = "eylemler";
+
+    function dugme(yazi, durum, sinif) {
+      const b = document.createElement("button");
+      b.className = "eylem " + (sinif || "");
+      b.type = "button";
+      b.textContent = yazi;
+      b.addEventListener("click", () => {
+        b.disabled = true;
+        SiparisServisi.durumGuncelle(s.id, durum).catch(e => {
+          b.disabled = false;
+          alert("Güncellenemedi: " + e.message);
+        });
+      });
+      return b;
+    }
+
+    if (s.durum === "yeni") {
+      eylemler.append(dugme("Hazırlanıyor", "hazirlaniyor", "birincil"), dugme("İptal", "iptal"));
+    } else if (s.durum === "hazirlaniyor") {
+      eylemler.append(dugme("Sipariş hazır", "hazir", "olumlu"), dugme("Geri al", "yeni"));
+    } else if (s.durum === "hazir") {
+      eylemler.append(dugme("Teslim edildi", "teslim", "birincil"), dugme("Geri al", "hazirlaniyor"));
+    } else {
+      eylemler.append(dugme("Geri al", "hazir"));
+    }
+
+    kart.appendChild(eylemler);
+    return kart;
+  }
+
+  function ciz(liste) {
+    sonListe = liste;
+
+    for (const b of filtreEl.children) {
+      const f = FILTRELER.find(x => x.id === b.dataset.filtre);
+      const n = f.durumlar ? liste.filter(s => f.durumlar.includes(s.durum)).length : liste.length;
+      b.setAttribute("aria-pressed", String(f.id === aktifFiltre));
+      b.querySelector(".sayac").textContent = n ? "(" + n + ")" : "";
+    }
+
+    const f = FILTRELER.find(x => x.id === aktifFiltre);
+    const gosterilecek = f.durumlar ? liste.filter(s => f.durumlar.includes(s.durum)) : liste;
+
+    listeEl.textContent = "";
+
+    if (window.SiparisAyar.mod === "yerel") {
+      const uyari = document.createElement("div");
+      uyari.className = "uyari-kutu";
+      uyari.innerHTML = "<b>Demo modu.</b> Siparişler yalnızca bu tarayıcıda tutuluyor — " +
+        "menüyü <b>aynı tarayıcının başka bir sekmesinde</b> açıp sipariş ver, buraya anında düşsün. " +
+        "Farklı cihazların birbirini görmesi için sunucu bağlantısı gerekir (README'ye bak).";
+      listeEl.appendChild(uyari);
+    }
+
+    if (!gosterilecek.length) {
+      const bos = document.createElement("div");
+      bos.className = "bos";
+      bos.innerHTML = "<strong>Sipariş yok</strong><span>Yeni sipariş geldiğinde burada belirir.</span>";
+      listeEl.appendChild(bos);
+      return;
+    }
+
+    for (const s of gosterilecek) listeEl.appendChild(kartYap(s));
+  }
+
+  /* --------------------------------------------------------------- bağlan */
+
+  function durumGoster(sinif, yazi) {
+    noktaEl.className = "nokta " + sinif;
+    yaziEl.textContent = yazi;
+  }
+
+  SiparisServisi.abone(liste => {
+    const yeniler = liste.filter(s => s.durum === "yeni" && !bilinenIdler.has(s.id));
+    if (!ilkYukleme && yeniler.length) sesCal();
+    for (const s of liste) bilinenIdler.add(s.id);
+    ilkYukleme = false;
+
+    durumGoster(
+      window.SiparisAyar.mod === "supabase" ? "" : "uyari",
+      window.SiparisAyar.mod === "supabase" ? "Canlı" : "Demo modu"
+    );
+    ciz(liste);
+  });
+
+  SiparisServisi.baslat().catch(e => {
+    durumGoster("hata", "Bağlanamadı");
+    console.error(e);
+    const uyari = document.createElement("div");
+    uyari.className = "uyari-kutu";
+    uyari.innerHTML = "<b>Sunucuya bağlanılamadı.</b> " + e.message;
+    listeEl.prepend(uyari);
+  });
+
+  document.getElementById("sifirla").addEventListener("click", () => {
+    if (confirm("Tüm siparişler silinsin mi? (demo sıfırlama)")) {
+      bilinenIdler = new Set();
+      SiparisServisi.hepsiniSil().catch(e => alert("Silinemedi: " + e.message));
+    }
+  });
+
+  // "12 dk" gibi göreli saatler dursun diye dakikada bir tazele
+  setInterval(() => ciz(sonListe), 60000);
+</script>
+</body>
+</html>
